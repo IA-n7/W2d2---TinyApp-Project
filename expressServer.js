@@ -13,9 +13,11 @@ var urlDatabase = {
 };
 
 function generateRandomString() {
-  var short = "";
-  return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-  return short;
+  var randomString = "";
+  var allPossibleCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (var i = 0; i < 5; i++)
+    randomString += allPossibleCharacters.charAt(Math.floor(Math.random() * allPossibleCharacters.length));
+  return randomString;
 }
 
 // app.get("/urls.json", (req, res) => {
