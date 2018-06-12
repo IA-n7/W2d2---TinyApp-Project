@@ -50,8 +50,11 @@ app.get("/", (req, res) => {
 
 //POSTing submitted URLs
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // debug statement to see POST parameters
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  console.log(req.body);
+  var long = req.body["longURL"];
+  var urlID = generateRandomString();
+  res.redirect(`/urls/${urlID}`);
+  urlDatabase[urlID] = long;
 });
 
 app.listen(PORT, () => {
