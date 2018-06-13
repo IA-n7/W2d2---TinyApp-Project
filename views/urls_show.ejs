@@ -11,12 +11,20 @@
 
   <body>
     <div>
-        <h1>Individual URLs</h1>
-        <p></p>
-        <ul>
+      <h1>Individual URLs</h1>
+      <p></p>
+      <ul>
         <li><%= shortURL + ":  " + longURL%></li>
-        </ul>
+        <li> 
+          <form action="/urls/<%= shortURL%>/update" method="POST">
+          <label for="longURL">Update original URL:</label>
+          <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
+          <input type="submit" value="Update">
+          </form>
+        </li>
+      </ul>
     </div>
+
   </body>
 
 </html>

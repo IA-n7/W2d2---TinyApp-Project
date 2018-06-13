@@ -10,16 +10,23 @@
 </header>
 
   <body>
-    <div>
-        <h1>URLs</h1>
+    <div>   
+        <h1>URL Index</h1>
         <p></p>
         <ul>
     <% for(shortUrl in urls) {%>
         <li><%= shortUrl + ":  " + urls[shortUrl] %></li>
+
+        <a href="/urls/<%= shortUrl%>">Edit</a>
+
+        <form method="POST" action="/urls/<%= shortUrl%>/delete">
+          <input type="submit" value="Delete">
+
+        </form>
     <% }; %>
 </ul>
 
-  <a href="url">Shorten new URL</a>
+  <a href="/urls/new">Shorten new URL</a>
 
     </div>
   </body>
