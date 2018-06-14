@@ -19,15 +19,15 @@ const users = {
     email: "ricky@acadia.nb", 
     password: "purple-monkey-dinosaur"
   },
- "Fred": {
+  "Fred": {
     email: "fred@bringbackthebowls.qc", 
     password: "bowltheif"
   },
-   "Van": { 
+  "Van": { 
     email: "van@ENGLAND.com", 
     password: "dishwasher-funk"
   },
-   "Arielle": {
+  "Arielle": {
     email: "ari@playsgoodmusic.mtl", 
     password: "cieling-fan"
   }
@@ -59,8 +59,8 @@ app.get("/", (req, res) => {
 //URL Page
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase,
-                      "user": users[req.cookies["user-id"]] 
-                    };
+    "user": users[req.cookies["user-id"]] 
+  };
   console.log(templateVars);
   res.render("urls_index", templateVars);
 });
@@ -68,23 +68,23 @@ app.get("/urls", (req, res) => {
 //Login Page
 app.get("/login", (req, res) => {
   let templateVars = { urls: urlDatabase,
-                      "user": users[req.cookies["user-id"]] 
-                    };
+    "user": users[req.cookies["user-id"]] 
+  };
   res.render("login", templateVars);
 });
 
 //Generation Page
 app.get("/urls/new", (req, res) => {
-    let templateVars = {"user": users[req.cookies["user-id"]]};
+  let templateVars = {"user": users[req.cookies["user-id"]]};
   res.render("urls_new", templateVars);
 });
 
 //Specific ID Page
 app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id,
-                        longURL: urlDatabase[req.params.id],
-                        "user": users[req.cookies["user-id"]]
-                      };
+    longURL: urlDatabase[req.params.id],
+    "user": users[req.cookies["user-id"]]
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -154,8 +154,8 @@ app.post("/login", (req,res) => {
 
 //Logout writing
 app.post("/logout", (req,res) => {
- res.clearCookie("user-id");
- res.redirect("/urls");
+  res.clearCookie("user-id");
+  res.redirect("/urls");
 });
 
 //Register - account submission
