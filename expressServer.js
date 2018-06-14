@@ -5,6 +5,11 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+var cookieParser = require('cookie-parser')
+
+app.use(cookieParser())
+
+
 app.set('view engine', 'ejs');
 
 var urlDatabase = {
@@ -26,25 +31,38 @@ function generateRandomString() {
 
 //URL Page
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { urls: urlDatabase,
+                      username: req.cookies["username"] 
+                    };
   res.render("urls_index", templateVars);
 });
 
-//GGeneration Page
+//Generation Page
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+    console.log(req.cookies["username"]);
+    let templateVars = {username: req.cookies["username"] 
+                        };
+  res.render("urls_new", templateVars);
 });
- 
+
 //Specific ID Page
 app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id,
-                        longURL: urlDatabase[req.params.id]
+                        longURL: urlDatabase[req.params.id],
+                        username: req.cookies["username"]
                       };
   res.render("urls_show", templateVars);
 });
 
 //Home page
 app.get("/", (req, res) => {
+  res.end("OK");
+});
+
+//Register page
+app.get("/register", (req, res) => {
+
+
   res.end("OK");
 });
 
@@ -69,14 +87,29 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
+//POSTing edit 
+app.post("/urls/:id/edit", (req, res) => {
+  let short = req.params.id;
+  res.redirect(`/urls/${short}`);
+});
+
 //POSTing an updated longURL
 app.post("/urls/:id/update", (req, res) => {
-  console.log(req.params);
-  console.log(req.body["longURL"]);
   let long = req.body["longURL"];
   let short = req.params["id"];
   urlDatabase[short] = long;
   res.redirect(`/urls/`);
+});
+
+app.post("/login", (req,res) => {
+  let short = req.body['username']
+ res.cookie("username", short);
+ res.redirect("/urls");
+});
+
+app.post("/logout", (req,res) => {
+ res.clearCookie("username");
+ res.redirect("/urls");
 });
 
 //Listening
