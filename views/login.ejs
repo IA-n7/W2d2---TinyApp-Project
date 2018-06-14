@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<header>
+    <% include ./partials/header %>
+</header>
+<body>
+
+      <h1>Sign in to an existing account:</h1>
+  
+   <form method="POST" action="/login">
+    <label for="email">Email:</label>
+    <input type="text" name="email" style="width: 300px" >
+    <div> </div>
+
+    <label for="email">Password:</label>
+    <input type="text" name="password" style="width: 300px" >
+    <div></div>
+    <input type="submit" name="Sign In" value="Sign In">
+   </form>
+
+</body>
+</html>

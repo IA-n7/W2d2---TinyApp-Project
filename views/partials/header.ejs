@@ -15,24 +15,23 @@
         </ul>
     </div>
 
- <% if (username === undefined) { %>
+ <% if (user === undefined) { %>
 
-   <form method="POST" action="/login">
-     <p>Username:</p>
-     <input type="text" name="username" >
+   <form method="GET" action="/login">
      <input type="submit" name="Sign In" value="Sign In">
    </form>
 
-   <form method="GET" action="/register">
+      <form method="GET" action="/register">
      <input type="submit" name="Sign Up" value="Sign Up">
    </form>
 
    <% } else { %>
+
+   <p><%= user["email"] %></p>
    <form method="POST" action="/logout">
      <input type="submit" name="Log Out" value="Log Out">
    </form>
    <% }; %>
- <p><%= username %></p>
 
 
 </div>
