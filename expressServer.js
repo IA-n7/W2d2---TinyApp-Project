@@ -2,11 +2,14 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
+const flash = require('connect-flash');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 
-app.use(bodyParser.urlencoded({extended: true}));
+
 app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(flash());
 app.use(cookieSession({
   name: 'session',
   keys: ["77777", "99181"],
@@ -47,8 +50,6 @@ var users = {
   }
 }
 
-
-
 function generateRandomString() {
   let randomString = "";
   let allPossibleCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -57,7 +58,7 @@ function generateRandomString() {
   return randomString;
 }
 
-//locates and return user-based urls
+//locates and return user-specific urls
 function findURLsforUser (userid) {
   let urls = {};
   for (id in urlDatabase) {
@@ -68,35 +69,26 @@ function findURLsforUser (userid) {
   return urls;
 }
 
-//checks for user session
-function ifUser (req) {
-  if((req.session.user_id) !== undefined) {
-    return 1;
-  } else {
-    return 0;
-  }
+//checks for user
+function currentUser (req) {
+  return req.session.user_id;
 }
 
 //404 Handler
-const render404 = res => {
-  res.status(404).render("404");
+app.get("/404", (req, res) => {
+  res.render("404");
 };
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
 
 //Home page
 app.get("/", (req, res) => {
-  res.end("HOME PAAAAAAAAGE \n Welcome to TinyApp! \n Try going to /urls!");
+  res.redirect('/urls');
 });
 
 
 //URL Page
 app.get("/urls", (req, res) => {
-  let condition = ifUser(req);
-  if (condition > 0) {
+  let loggedIn = currentUser(req);
+  if (loggedIn) {
     let urls = findURLsforUser(req.session.user_id);
     let email = req.session.user_id["email"];
     let templateVars = { 
@@ -133,28 +125,23 @@ app.get("/urls/new", (req, res) => {
 
 //Specific ID Page
 app.get("/urls/:id", (req, res) => {
-  let condition = ifUser(req);
+  let loggedIn = currentUser(req);
   let urls = findURLsforUser(req.session.user_id);
-
-  if (condition > 0) {
-    for (urlid in urls) {
-      if (req.params.id === urlid) {
-        let templateVars = { 
-          properUser: true,
-          shortURL: req.params.id,
-          longURL: urlDatabase[req.params.id]["longURL"],
-          "user": users[req.session.user_id]["email"]
-          };
-        res.render("urls_show", templateVars);
-      }
-    }
-    let templateVars = { 
-      properUser: false,
+  //check for a logged in user
+  if (loggedIn) {
+    let templateVars = {
       shortURL: req.params.id,
       longURL: urlDatabase[req.params.id]["longURL"],
       "user": users[req.session.user_id]["email"]
     };
+    //check for user-specific urls
+    if (urls[req.params.id]) {
+    templateVars["properUser"] = true;
+        res.render("urls_show", templateVars);
+      } else { 
+    templateVars["properUser"] = false;
     res.render("urls_show", templateVars);
+    }
   } else {
   res.redirect("/login/");
   }
@@ -237,7 +224,7 @@ app.post("/urls/new", (req, res) => {
 
 
 //Login writing
-app.post("/login", (req,res) => {
+app.post("/login", (req, res) => {
   let emailCheck = req.body['email'];
   let passwordCheck = req.body['password'];
   //check for empty field entries
@@ -248,28 +235,24 @@ app.post("/login", (req,res) => {
   for (checkUser in users) {
     if(emailCheck === users[checkUser]["email"] && bcrypt.compareSync(passwordCheck, users[checkUser]["password"])) {
       let temp = users[checkUser]["id"];
-      // res.cookie("user_id", temp);
       req.session.user_id = temp;
       res.redirect("/urls");
-      break;
     } else {
     }
   }
-  //ERROR SOMEWHERE HERE, SETTING HEADER
   render404(res);
 });
 
 
 //Logout writing
-app.post("/logout", (req,res) => {
-  // res.clearCookie("user_id");
+app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
 
 
 //Register - account submission
-app.post("/register", (req,res) => {
+app.post("/register", (req, res) => {
   let email = req.body['email'];
   let password = req.body['password'];
   let userID = generateRandomString();
@@ -291,7 +274,6 @@ app.post("/register", (req,res) => {
   insertUser["email"] = email;
   insertUser["password"] = hashedPassword;
   users[userID] = insertUser;
-  // res.cookie("user_id", userID);
   req.session.user_id = userID;
   res.redirect("/urls");
   }
