@@ -13,6 +13,9 @@
     <div>
       <h1>Individual URLs</h1>
       <p></p>
+
+      <% if (properUser === true) { %>
+
       <ul>
         <li><%= shortURL + ":  " + longURL%></li>
         <li> 
@@ -23,10 +26,13 @@
           </form>
         </li>
       </ul>
-            <% if (user == "") { %>
-        <p>Please login!</p>
+
+      <% } else { %>
+
+      <p>This does not belong to you!</p>
 
       <% } %>
+
     </div>
 
   </body>

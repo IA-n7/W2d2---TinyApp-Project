@@ -130,16 +130,30 @@ app.get("/urls/new", (req, res) => {
 //Specific ID Page
 app.get("/urls/:id", (req, res) => {
   let condition = ifUser(req);
+  let urls = findURLsforUser(req.cookies["user-id"]);
+
   if (condition > 0) {
-      let templateVars = { 
-    shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id]["longURL"],
-    "user": users[req.cookies["user-id"]]["email"]
-  };
-  res.render("urls_show", templateVars);
-} else {
+    for (urlid in urls) {
+      if (req.params.id === urlid) {
+        let templateVars = { 
+          properUser: true,
+          shortURL: req.params.id,
+          longURL: urlDatabase[req.params.id]["longURL"],
+          "user": users[req.cookies["user-id"]]["email"]
+          };
+        res.render("urls_show", templateVars);
+      }
+    }
+    let templateVars = { 
+      properUser: false,
+      shortURL: req.params.id,
+      longURL: urlDatabase[req.params.id]["longURL"],
+      "user": users[req.cookies["user-id"]]["email"]
+    };
+    res.render("urls_show", templateVars);
+  } else {
   res.redirect("/login/");
-}
+  }
 
 });
 
@@ -237,7 +251,7 @@ app.post("/login", (req,res) => {
     } else {
     }
   }
-  //ERROR SOMEWHERE HERE, SETTING HEADER TWICE
+  //ERROR SOMEWHERE HERE, SETTING HEADER
   render404(res);
 });
 
