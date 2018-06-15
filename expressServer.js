@@ -5,9 +5,11 @@ const bodyParser = require("body-parser");
 const flash = require('connect-flash');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const methodOverride = require('method-override')
 
 
 app.set('view engine', 'ejs');
+app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(flash());
 app.use(cookieSession({
@@ -76,8 +78,17 @@ function currentUser (req) {
 
 //404 Handler
 app.get("/404", (req, res) => {
-  res.render("404");
-};
+  let loggedIn = currentUser(req);
+  let templateVars = { 
+    "user": undefined
+  };
+  if (loggedIn) {
+      templateVars = { 
+      "user": users[req.session.user_id]["email"]
+      };
+    }
+  res.render("404", templateVars);
+});
 
 //Home page
 app.get("/", (req, res) => {
@@ -182,13 +193,13 @@ app.post("/urls", (req, res) => {
 
 
 //Delete URL
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id", (req, res) => {
   let short = req.params.id;
   if(urlDatabase[short]["userID"] === req.session.user_id) {
     delete urlDatabase[short];
     res.redirect(`/urls`);
   } else {
-      render404(res);
+      res.redirect('/404');
   }
 });
 
@@ -199,13 +210,13 @@ app.post("/urls/:id/edit", (req, res) => {
   if(urlDatabase[short]["userID"] === req.session.user_id) {
      res.redirect(`/urls/${short}`);
   } else {
-    render404(res);
+    res.redirect('/404');
   }
 });
 
 
 //Update longURL
-app.post("/urls/:id/update", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   let long = req.body["longURL"];
   let short = req.params["id"];
   urlDatabase[short]["longURL"] = long;
@@ -229,7 +240,7 @@ app.post("/login", (req, res) => {
   let passwordCheck = req.body['password'];
   //check for empty field entries
   if(emailCheck === undefined || passwordCheck === undefined){
-    render404(res);
+    res.redirect('/404');
   }
   //email/password match check
   for (checkUser in users) {
@@ -240,7 +251,7 @@ app.post("/login", (req, res) => {
     } else {
     }
   }
-  render404(res);
+  res.redirect('/404');
 });
 
 
@@ -260,12 +271,12 @@ app.post("/register", (req, res) => {
 
   //check for empty fields entries
   if((email === "") || (password === "")){
-    render404(res);
+    res.redirect('/404');
   } else {
     //check for existing user
     for (checkUser in users) {
       if(email === checkUser["email"]){
-        render404(res);
+        res.redirect('/404');
       }
     }
   //store user info, redirect

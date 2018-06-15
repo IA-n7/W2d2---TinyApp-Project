@@ -19,7 +19,7 @@
       <ul>
         <li><%= shortURL + ":  " + longURL%></li>
         <li> 
-          <form action="/urls/<%= shortURL%>/update" method="POST">
+          <form action="/urls/<%= shortURL%>?_method=PUT" method="POST">
           <label for="longURL">Update original URL:</label>
           <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
           <input type="submit" value="Update">
