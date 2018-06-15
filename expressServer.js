@@ -53,6 +53,7 @@ function generateRandomString() {
   return randomString;
 }
 
+//locates and return user-based urls
 function findURLsforUser (userid) {
   let urls = {};
   for (id in urlDatabase) {
@@ -63,6 +64,7 @@ function findURLsforUser (userid) {
   return urls;
 }
 
+//checks for user session
 function ifUser (req) {
   if((req.cookies["user-id"]) !== undefined) {
     return 1;
@@ -71,7 +73,7 @@ function ifUser (req) {
   }
 }
 
-//404 Helper
+//404 Handler
 const render404 = res => {
   res.status(404).render("404");
 };
@@ -80,10 +82,12 @@ const render404 = res => {
 //   res.json(urlDatabase);
 // });
 
+
 //Home page
 app.get("/", (req, res) => {
   res.end("HOME PAAAAAAAAGE \n Welcome to TinyApp! \n Try going to /urls!");
 });
+
 
 //URL Page
 app.get("/urls", (req, res) => {
@@ -105,6 +109,7 @@ app.get("/urls", (req, res) => {
   }
 });
 
+
 //Login Page
 app.get("/login", (req, res) => {
   let templateVars = { 
@@ -114,11 +119,13 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
+
 //Generation Page
 app.get("/urls/new", (req, res) => {
   let templateVars = {"user": users[req.cookies["user-id"]]["email"]};
   res.render("urls_new", templateVars);
 });
+
 
 //Specific ID Page
 app.get("/urls/:id", (req, res) => {
@@ -136,11 +143,13 @@ app.get("/urls/:id", (req, res) => {
 
 });
 
+
 //Register page
 app.get("/register", (req, res) => {
  let templateVars = { "user": users[req.cookies["user-id"]] };
  res.render("register", templateVars);
 });
+
 
 //Redirect from /u
 app.get("/u/:shortURL", (req, res) => {
@@ -166,16 +175,18 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${urlID}`);
 });
 
+
 //Delete URL
 app.post("/urls/:id/delete", (req, res) => {
   let short = req.params.id;
-    if(urlDatabase[short]["userID"] === req.cookies["user-id"]) {
-      delete urlDatabase[short];
-      res.redirect(`/urls`);
-    } else {
-        render404(res);
-    }
+  if(urlDatabase[short]["userID"] === req.cookies["user-id"]) {
+    delete urlDatabase[short];
+    res.redirect(`/urls`);
+  } else {
+      render404(res);
+  }
 });
+
 
 //Edit redirect
 app.post("/urls/:id/edit", (req, res) => {
@@ -187,6 +198,7 @@ app.post("/urls/:id/edit", (req, res) => {
   }
 });
 
+
 //Update longURL
 app.post("/urls/:id/update", (req, res) => {
   let long = req.body["longURL"];
@@ -194,6 +206,7 @@ app.post("/urls/:id/update", (req, res) => {
   urlDatabase[short]["longURL"] = long;
   res.redirect(`/urls/`);
 });
+
 
 //NewURL redirect
 app.post("/urls/new", (req, res) => {
@@ -204,15 +217,19 @@ app.post("/urls/new", (req, res) => {
   }
 });
 
+
 //Login writing
 app.post("/login", (req,res) => {
   let emailCheck = req.body['email'];
   let passwordCheck = req.body['password'];
+  //check for empty field entries
   if(emailCheck === undefined || passwordCheck === undefined){
     render404(res);
   }
+  //email/password match check
   for (checkUser in users) {
-    if(emailCheck === users[checkUser]["email"] && passwordCheck === users[checkUser]["password"]){
+      console.log(users[checkUser]["password"]);
+    if(emailCheck === users[checkUser]["email"] && bcrypt.compareSync(passwordCheck, users[checkUser]["password"])) {
       let temp = users[checkUser]["id"];
       res.cookie("user-id", temp);    
       res.redirect("/urls");
@@ -220,14 +237,17 @@ app.post("/login", (req,res) => {
     } else {
     }
   }
+  //ERROR SOMEWHERE HERE, SETTING HEADER TWICE
   render404(res);
 });
+
 
 //Logout writing
 app.post("/logout", (req,res) => {
   res.clearCookie("user-id");
   res.redirect("/urls");
 });
+
 
 //Register - account submission
 app.post("/register", (req,res) => {
@@ -236,24 +256,27 @@ app.post("/register", (req,res) => {
   let userID = generateRandomString();
   let insertUser = {};
 
-  let hashedPassword = bcrypt.hashSync(password, 10);
-
+  //check for empty fields entries
   if((email === "") || (password === "")){
     render404(res);
   } else {
+    //check for existing user
     for (checkUser in users) {
       if(email === checkUser["email"]){
         render404(res);
       }
     }
-    insertUser["id"] = userID;
-    insertUser["email"] = email;
-    insertUser["password"] = password;
-    users[userID] = insertUser;
-    res.cookie("user-id", userID);
-    res.redirect("/urls");
+  //store user info, redirect
+  let hashedPassword = bcrypt.hashSync(password, 10);
+  insertUser["id"] = userID;
+  insertUser["email"] = email;
+  insertUser["password"] = hashedPassword;
+  users[userID] = insertUser;
+  res.cookie("user-id", userID);
+  res.redirect("/urls");
   }
 });
+
 
 //Listening
 app.listen(PORT, () => {
